@@ -22,7 +22,7 @@ public class MongoDemo {
         //获取集合
         MongoCollection<Document> spit = spitdb.getCollection("spit");
 
-        //查询记录获取文档集合
+        //查询记录获取文档集合  全部提交完毕
         FindIterable<Document> documents = spit.find();
         //遍历数据
         for (Document document : documents) {
