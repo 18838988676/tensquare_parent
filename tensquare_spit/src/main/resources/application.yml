@@ -1,0 +1,20 @@
+server:
+  port: 9006
+spring:
+  application:
+    name: tensquare-spit #指定服务名
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.233.128:3306/tensquare_spit?characterEncoding=utf-8
+    username: root
+    password: 123456
+  jpa:
+    database: mysql
+    show-sql: true
+    generate-ddl: true
+  redis:
+    host: 192.168.233.128
+  data:
+    mongodb:
+      database: spitdb
+      host: 192.168.233.128
