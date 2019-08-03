@@ -17,7 +17,7 @@ public class MongoDemo3 {
     //条件查询 比较运算符
     public static void main(String[] args) {
         //创建连接
-        MongoClient client = new MongoClient("192.168.233.128");
+        MongoClient client = new MongoClient("192.168.233.129");
         //打开数据库
         MongoDatabase spitdb = client.getDatabase("spitdb");
         //获取集合

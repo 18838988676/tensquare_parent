@@ -19,7 +19,7 @@ public class MongoDemo5 {
     //插入数据
     public static void main(String[] args) {
         //创建连接
-        MongoClient client = new MongoClient("192.168.233.128");
+        MongoClient client = new MongoClient("192.168.233.129");
         //打开数据库
         MongoDatabase spitdb = client.getDatabase("recruitdb");
         //获取集合

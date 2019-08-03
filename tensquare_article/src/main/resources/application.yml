@@ -5,7 +5,7 @@ spring:
     name: tensquare-article #指定服务名
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.233.128:3306/tensquare_article?characterEncoding=utf-8
+    url: jdbc:mysql://192.168.233.129:3306/tensquare_article?characterEncoding=utf-8
     username: root
     password: 123456
   jpa:
@@ -13,10 +13,10 @@ spring:
     show-sql: true
     generate-ddl: true
   redis:
-    host: 192.168.233.128
+    host: 192.168.233.129
   data:
     mongodb:
-      uri: mongodb://192.168.233.128
+      uri: mongodb://192.168.233.129
       host: 27017
       database: recruitdb
 #别人都没写这个模块的mongodb  加了可能出错   可以删除

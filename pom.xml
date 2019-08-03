@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>tensquare_spit</module>
+        <module>tensquare_search</module>
     </modules>
     <packaging>pom</packaging>
 
