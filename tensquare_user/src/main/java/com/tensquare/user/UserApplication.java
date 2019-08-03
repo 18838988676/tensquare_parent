@@ -14,18 +14,17 @@ public class UserApplication {
 	}
 
 	@Bean
-	public IdWorker idWorkker(){
+	public IdWorker idWorker(){
 		return new IdWorker(1, 1);
 	}
 
 	@Bean
-	public BCryptPasswordEncoder bCryptPasswordEncoder(){
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
-	public JwtUtil jwtUtil(){
+	public JwtUtil jwtUtil() {
 		return new JwtUtil();
 	}
-
 }

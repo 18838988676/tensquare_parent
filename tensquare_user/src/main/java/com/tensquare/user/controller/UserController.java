@@ -1,18 +1,20 @@
 package com.tensquare.user.controller;
+
 import com.tensquare.user.pojo.User;
 import com.tensquare.user.service.UserService;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
-import io.jsonwebtoken.Claims;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import utils.JwtUtil;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * 控制器层
  * @author Administrator
@@ -23,69 +25,76 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
 
-	@Autowired
+	@Resource
 	private UserService userService;
 
-	@Autowired
+	@Resource
+	private RedisTemplate redisTemplate;
+
+	@Resource
 	private JwtUtil jwtUtil;
 
-	@Autowired
-	private HttpServletRequest request;
+    /**
+     * 更新被关注好友粉丝数跟用户自己的关注数
+     * @param userId
+     * @param friendId
+     */
+    @PutMapping("/{userId}/{friendId}/{num}")
+    public void updateFansAndFollower(@PathVariable String userId, @PathVariable String friendId, @PathVariable int num) {
+        userService.updateFansAndFollower(num, userId, friendId);
+    }
 
-
-	//增加关注数
-	@RequestMapping(value = "/incfollow/{userid}/{x}",method = RequestMethod.POST)
-	public void incFollowcount(@PathVariable String userid,@PathVariable int x){
-		userService.incFollowcount(userid, x);
-	}
-
-	//增加粉丝数
-	@RequestMapping(value = "/incfans/{userid}/{x}",method = RequestMethod.POST)
-	public void incFanscount(@PathVariable String userid,@PathVariable int x){
-		userService.incFanscount(userid,x);
-	}
-
-
-	//用户登录
-	@RequestMapping(value = "/login",method = RequestMethod.POST)
-	public Result login(@RequestBody Map<String,String> loginmap){
-		User user = userService.findByMobileAndPassword(loginmap.get("mobile"), loginmap.get("password"));
-		if (user != null) {
-			//登录成功返回token
-			String token = jwtUtil.createJWT(user.getId(), user.getNickname(), "user");
-			Map map = new HashMap();
-			map.put("token",token);
-			map.put("name",user.getNickname());	//昵称
-			map.put("avatar",user.getAvatar());	//头像
-			return new Result(true, StatusCode.OK.getCode(), "登录成功",map);
-		} else {
-			return new Result(false,StatusCode.LOGINERROR.getCode(),"用户名或密码错误");
+	/**
+	 * 用户登录
+	 * @param user
+	 * @return
+	 */
+	@PostMapping("/login")
+	public Result login(@RequestBody User user) {
+		user = userService.login(user.getMobile(), user.getPassword());
+		if (user == null) {
+			return new Result(false, StatusCode.LOGINERROR.getCode(), "登录失败");
 		}
-	}
-//注册success
-	//用户注册
-	@RequestMapping(value = "/register/{code}",method = RequestMethod.POST)
-	public Result register(@RequestBody User user,@PathVariable String code){
-		userService.add(user,code);
-		return new Result(true,StatusCode.OK.getCode(),"注册成功");
-	}
-
-//http://127.0.0.1:9008/user/sendsms/18838988676
-	//发送验证码  //创建一个sms队列
-	@RequestMapping(value = "/sendsms/{mobile}",method = RequestMethod.POST)
-	public Result sendSms(@PathVariable String mobile){
-		userService.sendSms(mobile);
-		return new Result(true,StatusCode.OK.getCode(),"发送成功");
+		// 登录成功后的操作
+		String token = jwtUtil.createJWT(user.getId(), user.getMobile(), "user");
+		Map<String, Object> map = new HashMap<>();
+		map.put("token", token);
+		map.put("roles", "user");
+		return new Result(true, StatusCode.OK.getCode(), "登录成功", map);
 	}
 
+    /**
+     * 发送验证码  http://127.0.0.1:9008/user/sendsms/18838988676
+     * @param mobile
+     * @return
+     */
+    @PostMapping("/sendsms/{mobile}")
+    public Result sendSms(@PathVariable String mobile) {
+        userService.sendSms(mobile);
+        return new Result(true, StatusCode.OK.getCode(), "发送成功");
+    }
+//注册
+    @PostMapping("/register/{code}")
+    public Result register(@PathVariable String code, @RequestBody User user) {
+        // 得到缓存中的验证码
+        String checkCode = (String) redisTemplate.opsForValue().get("check_code_" + user.getMobile());
+        if (StringUtils.isEmpty(checkCode)) {
+            return new Result(false, StatusCode.ERROR.getCode(), "请先获取手机验证码");
+        }
+        if (!checkCode.equals(code)) {
+            return new Result(false, StatusCode.ERROR.getCode(), "请输入正确的验证码");
+        }
+        userService.add(user);
+        return new Result(true, StatusCode.OK.getCode(), "注册成功");
+    }
 
 	/**
 	 * 查询全部数据
 	 * @return
 	 */
-	@RequestMapping(method= RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.GET)
 	public Result findAll(){
-		return new Result(true,StatusCode.OK.getCode(),"查询成功",userService.findAll());
+		return new Result(true, StatusCode.OK.getCode(), "查询成功", userService.findAll());
 	}
 	
 	/**
@@ -93,9 +102,9 @@ public class UserController {
 	 * @param id ID
 	 * @return
 	 */
-	@RequestMapping(value="/{id}",method= RequestMethod.GET)
+	@RequestMapping(value="/{id}", method= RequestMethod.GET)
 	public Result findById(@PathVariable String id){
-		return new Result(true,StatusCode.OK.getCode(),"查询成功",userService.findById(id));
+		return new Result(true, StatusCode.OK.getCode(), "查询成功", userService.findById(id));
 	}
 
 
@@ -106,10 +115,10 @@ public class UserController {
 	 * @param size 页大小
 	 * @return 分页结果
 	 */
-	@RequestMapping(value="/search/{page}/{size}",method=RequestMethod.POST)
-	public Result findSearch(@RequestBody Map searchMap , @PathVariable int page, @PathVariable int size){
-		Page<User> pageList = userService.findSearch(searchMap, page, size);
-		return  new Result(true,StatusCode.OK.getCode(),"查询成功",  new PageResult<User>(pageList.getTotalElements(), pageList.getContent()) );
+	@RequestMapping(value="/search/{page}/{size}", method=RequestMethod.POST)
+	public Result findSearch(@RequestBody Map searchMap ,  @PathVariable int page,  @PathVariable int size){
+		Page<User> pageList = userService.findSearch(searchMap,  page,  size);
+		return  new Result(true, StatusCode.OK.getCode(), "查询成功",   new PageResult<User>(pageList.getTotalElements(),  pageList.getContent()) );
 	}
 
 	/**
@@ -117,9 +126,9 @@ public class UserController {
      * @param searchMap
      * @return
      */
-    @RequestMapping(value="/search",method = RequestMethod.POST)
+    @RequestMapping(value="/search", method = RequestMethod.POST)
     public Result findSearch( @RequestBody Map searchMap){
-        return new Result(true,StatusCode.OK.getCode(),"查询成功",userService.findSearch(searchMap));
+        return new Result(true, StatusCode.OK.getCode(), "查询成功", userService.findSearch(searchMap));
     }
 	
 	/**
@@ -129,33 +138,28 @@ public class UserController {
 	@RequestMapping(method=RequestMethod.POST)
 	public Result add(@RequestBody User user  ){
 		userService.add(user);
-		return new Result(true,StatusCode.OK.getCode(),"增加成功");
+		return new Result(true, StatusCode.OK.getCode(), "增加成功");
 	}
 	
 	/**
 	 * 修改
 	 * @param user
 	 */
-	@RequestMapping(value="/{id}",method= RequestMethod.PUT)
-	public Result update(@RequestBody User user, @PathVariable String id ){
+	@RequestMapping(value="/{id}", method= RequestMethod.PUT)
+	public Result update(@RequestBody User user,  @PathVariable String id ){
 		user.setId(id);
 		userService.update(user);		
-		return new Result(true,StatusCode.OK.getCode(),"修改成功");
+		return new Result(true, StatusCode.OK.getCode(), "修改成功");
 	}
 	
 	/**
 	 * 删除
 	 * @param id
 	 */
-	@RequestMapping(value="/{id}",method= RequestMethod.DELETE)
+	@RequestMapping(value="/{id}", method= RequestMethod.DELETE)
 	public Result delete(@PathVariable String id ){
-		//删除用户必须有管理员权限
-		Claims claims = (Claims) request.getAttribute("admin_claims");
-		if (claims==null) {
-			return new Result(true,StatusCode.ACCESSERROR.getCode(),"无权访问");
-		}
 		userService.deleteById(id);
-		return new Result(true,StatusCode.OK.getCode(),"删除成功");
+		return new Result(true, StatusCode.OK.getCode(), "删除成功");
 	}
 	
 }

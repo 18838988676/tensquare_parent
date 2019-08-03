@@ -4,7 +4,7 @@ spring:
   application:
     name: tensquare-qa #指定服务名
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.233.129:3306/tensquare_qa?characterEncoding=utf-8
     username: root
     password: 123456
@@ -12,3 +12,6 @@ spring:
     database: mysql
     show-sql: true
     generate-ddl: true
+jwt:
+  config:
+    key: itcast

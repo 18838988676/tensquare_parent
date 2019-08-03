@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import utils.IdWorker;
 
+import javax.annotation.Resource;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -33,22 +34,18 @@ public class AdminService {
 	@Autowired
 	private IdWorker idWorker;
 
+	@Resource
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-	/**
-	 * 根据登录名和密码查询
-	 * @param loginname
-	 * @param password
-	 * @return
-	 */
-	public Admin findByLoginnameAndPassword(String loginname,String password){
-		Admin admin = adminDao.findByLoginname(loginname);
-		//如果传入的密码和数据库密码匹配
-		if (admin != null && encoder.matches(password, admin.getPassword())) {
-			return admin;
-		} else {
-			return null;
-		}
-	}
+    public Admin login(Admin admin) {
+        // 先根据用户名查询对象
+        Admin loginName = adminDao.findByLoginname(admin.getLoginname());
+        // 然后用数据库中的密码跟用户输入密码进行比对
+        if (loginName != null && bCryptPasswordEncoder.matches(admin.getPassword(), loginName.getPassword())) {
+            return loginName;
+        }
+        return null;
+    }
 
 	/**
 	 * 查询全部列表
@@ -92,19 +89,14 @@ public class AdminService {
 		return adminDao.findById(id).get();
 	}
 
-
-	@Autowired
-	private BCryptPasswordEncoder encoder;
-
 	/**
 	 * 增加
 	 * @param admin
 	 */
 	public void add(Admin admin) {
-		admin.setId( idWorker.nextId()+"" );
-		//密码加密
-		String newpassword = encoder.encode(admin.getPassword());
-		admin.setPassword(newpassword);
+		admin.setId( idWorker.nextId() + "");
+		// 密码加密
+        admin.setPassword(bCryptPasswordEncoder.encode(admin.getPassword()));
 		adminDao.save(admin);
 	}
 
@@ -159,5 +151,4 @@ public class AdminService {
 		};
 
 	}
-
 }

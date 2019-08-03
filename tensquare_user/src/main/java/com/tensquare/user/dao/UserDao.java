@@ -13,25 +13,13 @@ import org.springframework.data.jpa.repository.Query;
  *
  */
 public interface UserDao extends JpaRepository<User,String>,JpaSpecificationExecutor<User>{
+    User findByMobile(String mobile);
 
-    /**
-     * 更新关注数
-     * @param userid
-     * @param x
-     */
     @Modifying
-    @Query("update User u set u.followcount=u.followcount+?2 where u.id=?1")
-    public void incFollowcount(String userid, int x);
+    @Query(value = "UPDATE tb_user SET fanscount = fanscount + ? WHERE id = ?", nativeQuery = true)
+    void updateFansNum(int num, String friendId);
 
-    /**
-     * 更新粉丝数
-     * @param userid
-     * @param x
-     */
     @Modifying
-    @Query("update User u set u.fanscount=u.fanscount+?2 where u.id=?1")
-    public void incFanscount(String userid, int x);
-
-    //查询用户
-    public User findByMobile(String mobile);
+    @Query(value = "UPDATE tb_user SET followcount = followcount + ? WHERE id = ?", nativeQuery = true)
+    void updateFollowNum(int num, String userId);
 }

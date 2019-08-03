@@ -15,7 +15,8 @@ spring:
     host: 192.168.233.129
   rabbitmq:
     host: 192.168.233.129
-jwt:
+jwt: #common需要
   config:
+    # 加盐
     key: itcast
     ttl: 3600000

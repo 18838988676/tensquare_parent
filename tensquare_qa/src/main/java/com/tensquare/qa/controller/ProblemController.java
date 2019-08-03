@@ -5,6 +5,7 @@ import com.tensquare.qa.service.ProblemService;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
@@ -127,12 +128,13 @@ public class ProblemController {
 	 */
 	@RequestMapping(method=RequestMethod.POST)
 	public Result add(@RequestBody Problem problem) {
-		String token = (String) request.getAttribute("claims_user");
-	    if (StringUtils.isEmpty(token)) {
-            return new Result(false, StatusCode.ACCESSERROR.getCode(), "权限不足");
-        }
+		//发布问题之前验证权限
+		Claims claims = (Claims) request.getAttribute("user_claims");
+		if (claims==null) {
+			return new Result(false,StatusCode.ACCESSERROR.getCode(),"无权发布");
+		}
 		problemService.add(problem);
-		return new Result(true,StatusCode.OK.getCode(),"增加成功");
+		return new Result(true, StatusCode.OK.getCode(), "增加成功");
 	}
 	
 	/**
