@@ -1,4 +1,4 @@
-package com.tensquare.qa.filter;
+package com.tensquare.qa.interceptor;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;

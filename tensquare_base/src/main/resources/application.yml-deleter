@@ -12,3 +12,12 @@ spring:
     database: mysql
     show-sql: true
     generate-ddl: true
+  rabbitmq:
+    host: 192.168.233.129
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6868/eureka
+  instance:
+    prefer-ip-address: true #跨域访问
+ #已经将其变为base-dev.yml上传到马云，使用spring cloud config管理配置文件：

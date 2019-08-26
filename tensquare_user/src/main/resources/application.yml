@@ -20,3 +20,11 @@ jwt: #common需要
     # 加盐
     key: itcast
     ttl: 3600000
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6868/eureka
+  instance:
+    prefer-ip-address: true #跨域访问
+user:
+  testConfig: hello

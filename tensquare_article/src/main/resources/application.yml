@@ -20,3 +20,9 @@ spring:
       host: 27017
       database: recruitdb
 #别人都没写这个模块的mongodb  加了可能出错   可以删除
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6868/eureka
+  instance:
+    prefer-ip-address: true #跨域访问

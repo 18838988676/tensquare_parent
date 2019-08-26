@@ -14,4 +14,10 @@ spring:
     generate-ddl: true
 jwt:
   config:
-    key: itcast
+    key: itcast   #这个颜值 必须统一 加密颜值和解密颜值必须一致
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6868/eureka
+  instance:
+    prefer-ip-address: true #跨域访问

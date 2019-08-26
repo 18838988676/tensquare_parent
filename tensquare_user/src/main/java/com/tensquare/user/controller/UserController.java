@@ -5,6 +5,8 @@ import com.tensquare.user.service.UserService;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.StringUtils;
@@ -21,6 +23,7 @@ import java.util.Map;
  *
  */
 @RestController
+@RefreshScope   // 这是在spring cloud config 管理的配置文件在修改后，仍然需要重新启动服务器后的解决办法；
 @CrossOrigin
 @RequestMapping("/user")
 public class UserController {
@@ -33,6 +36,20 @@ public class UserController {
 
 	@Resource
 	private JwtUtil jwtUtil;
+
+	@Value("${user.testConfig}")
+	private String testConfig;
+
+	@RequestMapping(value = "/testConfig", method = RequestMethod.GET)
+	public String testConfig() {
+		return testConfig;
+	}
+
+	@RequestMapping(value="/test/{a}",method= RequestMethod.PUT)
+	public Result testTensquareUser(@PathVariable String a) {
+		System.out.println("test"+a);
+		return new Result(true, StatusCode.OK.getCode(), "发送成功:"+a);
+	}
 
     /**
      * 更新被关注好友粉丝数跟用户自己的关注数

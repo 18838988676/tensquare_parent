@@ -1,5 +1,6 @@
 package com.tensquare.qa.controller;
 
+import com.tensquare.qa.client.BaseClient;
 import com.tensquare.qa.pojo.Problem;
 import com.tensquare.qa.service.ProblemService;
 import entity.PageResult;
@@ -31,7 +32,14 @@ public class ProblemController {
 	private HttpServletRequest request;
 
 
-
+	@Resource
+	private BaseClient baseClient;
+//http://127.0.0.1:9003/problem/label/1  查出来了  ，但是 由于使用了jwt在登录时 在header 加入Authorization 属性 ，值是：jwt码，并与Bearer  属性组合
+// 需要登录用户http://127.0.0.1:9008/user/login?mobile=18838988676&password=123 获取返回的码，
+	@GetMapping("/label/{labelId}")
+	public Result findByLabelId(@PathVariable String labelId) {
+		return baseClient.findById(labelId);
+	}
 
 	/**
      * 最新问答

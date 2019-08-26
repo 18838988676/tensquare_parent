@@ -5,29 +5,42 @@ import com.tensquare.recruit.service.LabelService;
 import entity.PageResult;
 import entity.Result;
 import entity.StatusCode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
 
+
 @RestController
 @CrossOrigin            // 跨域
+@RefreshScope   // 这是在spring cloud config 管理的配置文件在修改后，仍然需要重新启动服务器后的解决办法；
 @RequestMapping("/label")
 public class LabelController {
     @Resource(name = "labelService")
     private LabelService service;
-//GET http://localhost:9001/label
+    @Value("${sms.ip}")
+    private String ip;
+
+    @RequestMapping(value = "/ip", method = RequestMethod.GET)
+    public String ip() {
+        return ip;
+    }
+
+    //GET http://localhost:9001/label
     @GetMapping
     public Result findAll() {
         return new Result(true, StatusCode.OK.getCode(), "查询成功", service.findAll());
     }
-//GET http://localhost:9001/label/2
+    //GET http://localhost:9001/label/2
     @GetMapping("/{labelId}")
     public Result findById(@PathVariable("labelId") String id) {
+        System.out.println("9901");
         return new Result(true, StatusCode.OK.getCode(), "查询成功", service.findById(id));
     }
-// POST  Body   http://localhost:9001/label/  raw   JSON(application/json)
+    // POST  Body   http://localhost:9001/label/  raw   JSON(application/json)
 /*{
     "id": "10",
         "labelname": "addTest",
@@ -41,7 +54,7 @@ public class LabelController {
         return new Result(true, StatusCode.OK.getCode(), "添加成功");
     }
 
-//    PUT body http://localhost:9001/label/1156838842108547072 raw ...
+    //    PUT body http://localhost:9001/label/1156838842108547072 raw ...
 /*
     {
         "id": "",
@@ -56,7 +69,7 @@ public class LabelController {
         service.update(label);
         return new Result(true, StatusCode.OK.getCode(), "修改成功");
     }
-//DELETE .. http://localhost:9001/label/1156838842108547072
+    //DELETE .. http://localhost:9001/label/1156838842108547072
     @DeleteMapping("/{labelId}")
     public Result deleteById(@PathVariable("labelId") String id) {
         service.deleteById(id);
@@ -72,7 +85,7 @@ public class LabelController {
         List<Label> list = service.findSearch(label);
         return new Result(true, StatusCode.OK.getCode(), "查询成功", list);
     }
-// POST http://localhost:9001/label/search/1/2
+    // POST http://localhost:9001/label/search/1/2
 /*{
     "labelname": ""
 }
