@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.TreeSet;
 
 /**
  * Description:
@@ -15,7 +17,7 @@ public class CreateJwtTest {
 
     //生成Token
     public static void main(String[] args) {
-
+        TreeSet
         long now = System.currentTimeMillis();
         long exp = now + 1000*60;   //1分钟过期时间
         JwtBuilder builder = Jwts.builder().setId("888")
