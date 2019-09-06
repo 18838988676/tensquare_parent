@@ -4,6 +4,9 @@ import com.example.testjavatools.deadlock.WmcDeadLockClass;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 public class test {
     @RequestMapping("/index")
@@ -32,6 +35,24 @@ public class test {
          WmcDeadLockClass.testDeadLockMethod();
     }
 
+    //内存溢出测试；
+    @RequestMapping("/index4")
+    public String   hh4(){
+        System.out.println("start");
+        List<User> list = new ArrayList<User>();
+        for (int i = 1; i < 10000; i++) {
+            User o = new User(i + "", System.currentTimeMillis() + "");
+            list.add(o);
+            o = null;
+        }
+        System.out.println("end");
+        try {
+            Thread.sleep(100000000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return  "endend ";
+    }
 
 
 }
